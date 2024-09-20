@@ -61,14 +61,7 @@ Next, create middleware to restrict access based on user roles.
 php artisan make:middleware RoleMiddleware
 ```
 
-Register Middlewar App.php File 
-```php
-->withMiddleware(function (Middleware $middleware) {
-        $middleware->alias([
-            'role' => RoleMiddleware::class,
-        ]);
-})
-```
+Middlewar File write this code for check auth
 ```php
 public function handle($request, Closure $next, $role)
 {
@@ -79,44 +72,18 @@ public function handle($request, Closure $next, $role)
 }
 ```
 
-Register this middleware in `app/Http/Kernel.php` under the `$routeMiddleware` array:
+Register this middleware in `bootstrap/app.php` under the `$routeMiddleware` array:
 
 ```php
-protected $routeMiddleware = [
-    // other middleware
-    'role' => \App\Http\Middleware\RoleMiddleware::class,
-];
+->withMiddleware(function (Middleware $middleware) {
+        $middleware->alias([
+            'role' => RoleMiddleware::class,
+        ]);
+})
 ```
 
-### Step 4: Configure Authentication Guards (Optional for Multiple Guards)
-If you want separate guards (e.g., one for users, one for admins), configure them in `config/auth.php`. By default, Breeze works with one guard, but you can add more as needed.
-
-#### Example:
-```php
-'guards' => [
-    'web' => [
-        'driver' => 'session',
-        'provider' => 'users',
-    ],
-    'admin' => [
-        'driver' => 'session',
-        'provider' => 'admins',
-    ],
-],
-'providers' => [
-    'users' => [
-        'driver' => 'eloquent',
-        'model' => App\Models\User::class,
-    ],
-    'admins' => [
-        'driver' => 'eloquent',
-        'model' => App\Models\Admin::class, // separate model for admins
-    ],
-],
-```
-
-### Step 5: Route Protection
-Use the middleware you created to protect routes based on roles.
+### Step 4: Route Protection
+Use the middleware you created to protect routes based on roles. 
 
 ```php
 Route::middleware(['auth', 'role:admin'])->group(function () {
@@ -128,7 +95,7 @@ Route::middleware(['auth', 'role:user'])->group(function () {
 });
 ```
 
-### Step 6: Customizing the Breeze Authentication Logic (Optional)
+### Step 5: Customizing the Breeze Authentication Logic (Optional)
 If you're using a single guard but want to customize login based on user roles, you can modify the `LoginController` to redirect users based on their role after login.
 
 #### Example in `LoginController`:
@@ -141,9 +108,3 @@ protected function authenticated(Request $request, $user)
     return redirect()->route('dashboard');
 }
 ```
-
-This will ensure that users are redirected to the appropriate dashboard after login, depending on their role.
-
----
-
-This setup should provide you with a multi-auth system using Laravel Breeze. Depending on your project needs, you can further extend this with custom guards, password resets, or multiple user tables if required. Let me know if you'd like to explore further customization!
