@@ -1,4 +1,4 @@
-### Step 1: Install Laravel Breeze
+### Step 1: Install Laravel 11 Breeze
 First, ensure Laravel Breeze is installed in your application.
 
 ```bash
@@ -50,9 +50,6 @@ class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
-    const ROLE_USER = 'user';
-    const ROLE_ADMIN = 'admin';
-
     protected $fillable = ['name', 'email', 'password', 'role'];
 }
 ```
@@ -64,8 +61,14 @@ Next, create middleware to restrict access based on user roles.
 php artisan make:middleware RoleMiddleware
 ```
 
-In the `RoleMiddleware` file (`app/Http/Middleware/RoleMiddleware.php`):
-
+Register Middlewar App.php File 
+```php
+->withMiddleware(function (Middleware $middleware) {
+        $middleware->alias([
+            'role' => RoleMiddleware::class,
+        ]);
+})
+```
 ```php
 public function handle($request, Closure $next, $role)
 {
